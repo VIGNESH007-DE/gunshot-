@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detection Client</title>
-    <!-- This styles the "Ready" screen on the phones -->
     <style>
         body, html { height: 100%; margin: 0; font-family: sans-serif; }
         body { display: flex; justify-content: center; align-items: center; background-color: #222; color: white; text-align: center; transition: background-color 0.1s ease; }
@@ -16,44 +15,27 @@
         <h1>Ready 🎧</h1>
         <p>Listening for the signal...</p>
     </div>
-
     <script type="module">
-        // 1. We import the necessary tools and your config file, just like the admin page.
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         import { firebaseConfig } from './firebase-config.js';
 
-        // 2. Connect to your Firebase project.
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // 3. Get the audio file ready to play.
-        const audio = new Audio('/sounds/gun_short_1.mp3');
-        audio.preload = 'auto';
+        // === THIS LINE IS UPDATED ===
+        // It now uses a reliable online sound effect.
+        const audio = new Audio('https://cdn.pixabay.com/download/audio/2021/08/04/audio_16cc0937a4.mp3');
         
-        // This is a safety check to prevent sound on the first load.
+        audio.preload = 'auto';
         let isFirstRun = true;
-
-        // 4. We point to the exact same document the admin page writes to.
         const triggerDocRef = doc(db, "gunshot", "trigger");
 
-        // 5. THIS IS THE MOST IMPORTANT PART: `onSnapshot` is a real-time listener.
-        //    It keeps a constant, live connection to the "trigger" document.
         onSnapshot(triggerDocRef, (doc) => {
-            
-            // 6. The code inside here runs AUTOMATICALLY anytime that document changes.
-            console.log("Received an update from Firestore.");
-            
-            // We skip the very first time it connects to avoid a sound on page load.
-            if (isFirstRun) {
-                isFirstRun = false;
-                return;
-            }
-
-            // 7. If it's a real update, we play the sound and flash the screen red.
+            if (isFirstRun) { isFirstRun = false; return; }
             document.body.style.backgroundColor = 'red';
-            audio.currentTime = 0; // Rewind sound to the start
-            audio.play();
+            audio.currentTime = 0;
+            audio.play().catch(e => console.error("Audio play failed:", e));
             setTimeout(() => { document.body.style.backgroundColor = '#222'; }, 300);
         });
     </script>
