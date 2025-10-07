@@ -1,1 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gunshot System</title>
+    <!-- Pusher JS Library -->
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+    <style>
+        /* General Styles */
+        body, html { height: 100%; margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; overflow: hidden; }
+        .view { display: none; width: 100%; height: 100%; justify-content: center; align-items: center; text-align: center; }
+
+        /* Admin View Styles */
+        #admin-view { flex-direction: column; background-color: #111; color: white; }
+        .warning { background-color: #ffc107; color: black; font-weight: bold; padding: 15px; border-radius: 8px; margin-bottom: 30px; max-width: 90%; }
+        #fireButton { font-size: clamp(2rem, 10vw, 5rem); padding: 40px 80px; cursor: pointer; border-radius: 20px; border: 5px solid #ff4500; background-color: #ff6347; color: white; text-shadow: 2px 2px 5px #000; box-shadow: 0 10px 20px rgba(0,0,0,0.5); transition: transform 0.1s; }
+        #fireButton:active { transform: scale(0.95); }
+
+        /* Phone View Styles */
+        #phone-view { background-color: #222; color: white; transition: background-color 0.1s ease; }
+        #phone-view.fired { background-color: red; }
+        #phone-view h1 { font-size: 2rem; }
+        #phone-view p { color: #999; }
+    </style>
+</head>
+<body>
+
+    <!-- This div is for the Admin page -->
+    <div id="admin-view" class="view">
+        <div class="warning">⚠️ INSECURE: Your secret keys are visible in this file. For testing only.</div>
+        <button id="fireButton">🔥 FIRE 🔥</button>
+    </div>
+
+    <!-- This div is for the Phone pages -->
+    <div id="phone-view" class="view">
+        <div>
+            <h1 id="phone-title">Phone: Ready 🎧</h1>
+            <p>Awaiting detection signal...</p>
+        </div>
+    </div>
+
+    <script>
+        // ==================================================================
+        // DANGER ZONE: Your keys are hardcoded here.
+        // This is INSECURE and only works because you enabled "Client Events".
+        // ==================================================================
+        const PUSHER_KEY = "6e7d25dc46d09cdbee56";
+        const PUSHER_CLUSTER = "ap2";
+        const EVENT_NAME = 'client-fire-event'; // Custom name for client events
+        const CHANNEL_NAME = 'gunshot-channel';
+
+        // --- Audio Setup ---
+        const audio = new Audio('sounds/gun_short_1.mp3');
+        audio.preload = 'auto';
+
+        // --- Pusher Connection ---
+        const pusher = new Pusher(PUSHER_KEY, {
+            cluster: PUSHER_CLUSTER
+        });
+        const channel = pusher.subscribe(CHANNEL_NAME);
+
+        // --- Page Routing Logic ---
+        window.addEventListener('load', function() {
+            const hash = window.location.hash;
+
+            // If URL has #phone1, #phone2, etc., set up a phone client
+            if (hash.startsWith('#phone')) {
+                const phoneId = hash.substring(1);
+                document.title = `Detection Client (${phoneId})`;
+                document.getElementById('phone-title').innerText = `Phone (${phoneId}): Ready 🎧`;
+                const phoneView = document.getElementById('phone-view');
+                phoneView.style.display = 'flex';
+
+                // Listen for the fire event
+                channel.bind(EVENT_NAME, function(data) {
+                    console.log('Fire signal received!');
+                    phoneView.classList.add('fired');
+                    audio.currentTime = 0;
+                    audio.play().catch(e => console.error("Audio play failed:", e));
+                    setTimeout(() => {
+                        phoneView.classList.remove('fired');
+                    }, 300);
+                });
+
+            } else {
+                // Otherwise, set up the Admin controller
+                document.title = 'Gunshot Admin';
+                document.getElementById('admin-view').style.display = 'flex';
+
+                const fireButton = document.getElementById('fireButton');
+                fireButton.addEventListener('click', () => {
+                    console.log('Admin sending fire signal...');
+                    // Trigger the event directly from the client (insecure)
+                    channel.trigger(EVENT_NAME, {});
+                });
+            }
+        });
+    </script>
+</body>
+</html>
 
