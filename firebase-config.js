@@ -2,11 +2,12 @@
 // This object is provided by Firebase when you create a web app.
 // It should look like the example below.
 
-export const firebaseConfig = {
-  apiKey: "AIzaSy...YOUR_API_KEY",
-  authDomain: "your-project-id.firebaseapp.com",
-  projectId: "your-project-id",
-  storageBucket: "your-project-id.appspot.com",
-  messagingSenderId: "1234567890",
-  appId: "1:1234567890:web:abcdef123456"
+const firebaseConfig = {
+  apiKey: "AIzaSyB6wKozl_JsAdsJqFBtlsqioP-8_IlXNAk",
+  authDomain: "gunshot-8e6fd.firebaseapp.com",
+  projectId: "gunshot-8e6fd",
+  storageBucket: "gunshot-8e6fd.firebasestorage.app",
+  messagingSenderId: "594353983479",
+  appId: "1:594353983479:web:df3dcb2f39ce64e2c928f2",
+  measurementId: "G-CX576KXCEG"
 };
